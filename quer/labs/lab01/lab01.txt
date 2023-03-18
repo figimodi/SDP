@@ -1,0 +1,244 @@
+System and Device Programming
+Laboratory number 01 (System and Programming part)
+
+
+
+Learning goals
+--------------
+
+Review laboratory: Operating system basics, i.e., filesystem,
+processes, signals, and threads.
+Solve all exercises or the ones more suited for you, at choice.
+
+ 
+
+Exercise 01
+Binary files
+------------
+
+An ASCII file has lines with the following format:
+- An identifier, i.e., an integer value varying from 1 to the number
+  of rows in the file (e.g., 1, 2, etc.)
+- A register number, i.e., a long integer of 6 digits (e.g., 164678)
+- A surname, i.e., a string of a maximum of 30 characters (e.g., Rossi)
+- A name, i.e., a string of a maximum of 30 characters (e.g., Mario)
+- An examination mark, i.e., an integer value.
+
+The following is a correct example of such a file:
+
+1 100000 Romano Antonio 25
+2 150000 Fabrizi Aldo 22
+3 200000 Verdi Giacomo 15
+4 250000 Rossi Luigi 30
+
+Write a C program in UNIX which receives three file names on the
+command line:
+file_1  file_2  file_3
+and which can:
+- Read the *text* file file_1 (with the previous format) and
+  store the same information into file file_2 in *binary* format.
+  The binary format file must have *fixed-length* records (i.e.,
+  each record must include an integer + a long integer + 31 characters
+  + 31 characters + an integer).
+- Read back the *binary* file file_2 and store it as a *text*
+  into file file_3 (with the same format of file_1).
+
+Suggestions
+-----------
+Manipulate text files using C library functions and binary files
+using the I/O UNIX library.
+As an alternative, use only the UNIX library *but* operate on the ASCII
+file on a byte-by-byte basis (and then move forward and backward to
+the record-by-record representation).
+
+Verify that files file_input_1 and file_output_2 are indeed equivalent
+using the shell command "wc" and "diff".
+
+
+
+Exercise 02
+Random File Walks
+-----------------
+
+File stores *binary* information with *fixed-length* records
+using the format of file_2 of Exercise 01.
+Write a program to implement a user menu with the following options:
+
+- R n: Where R is the character 'R', and n is an integer value.
+       Read from the file the record representing student number n and
+       display this information on standard output.
+
+- W n: Where W is the character 'W', and n is an integer value.
+       Read from standard input all data fields for the student number
+       n and write them on the file in position n.
+       
+- E: End the program.
+
+The input file name is given on the command line.
+
+The following is an example of execution (using the file presented in
+Exercise 01):
+
+> R 3     // Read info for student 3
+3 200000 Verdi Giacomo 15
+> R 1     // Read info for student 1
+1 100000 Romano Antonio 25
+> W 1     // Over-write info for the student in position 1
+          // with info read from standard input
+          // Read input data
+Data: 1 100000 Romano Antonio 27
+          // Overwrite record on file ...
+> W 5     // Add info for the student in position 5
+          // with info read from standard input
+          // Read input data
+Data: 5 157143 White House 30
+          // Overwrite record on file ...
+> E       // End program
+
+where
+- "//" specifies explanatory comments, not program I/O lines
+- "R 3", "R 1", "W 1", etc. are the user inputs
+- all other characters belong to the program output.
+
+
+
+Exercise 03
+Code analysis: fork, exec, system
+---------------------------------
+
+Given the following program, draw the process generation tree and indicate
+what it displays and for what reason.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(){
+  pid_t pid;
+  int i;
+  for (i=1; i<=3; i++){
+    switch (i) {
+      case 1: fork(); break;
+      case 2: pid=fork(); if (pid!=0) system ("echo case 2"); break;
+      case 3: execlp ("echo", "myPgrm", "case 3", NULL); break;
+    }
+  }
+  return (0);
+} 
+
+
+
+Exercise 04
+Code analysis: fork, exec, system
+---------------------------------
+
+Given the following program, draw the process generation tree and indicate
+what it displays and for what reason.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main () {
+  int i;
+  for (i=0; i<2; i++) {
+    printf ("i=%d\n", i);
+    if (fork())             // Call # 1
+      fork ();              // Call # 2
+    else
+      system ("echo i=i");  // Call # 3
+  }
+  return (1);
+}
+
+
+
+Exercise 05
+Code analysis: fork, exec, system
+---------------------------------
+
+Given the following program, draw the process generation tree and indicate
+what it displays and for what reason.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main () {
+  int i, j=-1;
+
+  for (i=0; i<5; i++) {
+    printf ("i=%d\n", i);
+    if (!fork()) {
+      for (j=2; j>0; j--) {
+        fork();
+        execlp ("echo", "i", "j", (char *) 0);
+      }
+    } else {
+      printf ("j=%d \n", j);
+    }
+  }
+
+  return (1);
+}
+
+
+
+Exercise 06
+Code implementation with processes
+----------------------------------
+
+Write a C program that receives two integer values on the command line,
+h and n, and it generates a process tree of height h and degree n.
+
+For example, if h=2 and n=2:
+- the primary process creates two processes
+- each one of these two processes creates two other processes
+- each one of these four processes creates two other processes
+at this point, eight leaf processes run, and the program must stop.
+
+More in detail, each node of the tree is a process.
+The initial process generates n child jobs and ends.
+All child processes must do the same thing, causing a number of
+processes on the tree leaves equal to n^h.
+Processes on the leaves must all display their own PID and end.
+
+
+
+Exercise 07
+Code implementation with processes
+----------------------------------
+
+A binary number of size n can be easily generated by a recursive function
+like the one reported in file e05recursive.c
+
+Transform the recursive program into a concurrent one, replacing the
+recursive procedure with the generation of an appropriate number of
+*processes*.
+Each process must display one binary number.
+Binary numbers can be displayed in any order.
+
+For example, if n=3, the function must generate and print numbers:
+000, 001, 010, 011, 100, 101, 110, 111
+IN ANY ORDER.
+
+
+
+Exercise 08
+Code implementation with processes and signals
+----------------------------------------------
+
+Write a C program that can handle signals as described by the following
+specifications.
+The program accepts signals SIGUSR1 and SIGUSR2, and:
+- It displays a "success" message every time it receives a signal SIGUSR1 followed
+  by a signal SIGUSR2, or vice-versa.
+- It displays an error message every time it receives two signals SIGUSR1, or two
+  signals SIGUSR2, consecutively.
+- It terminates if it receives three successive SIGUSR1 or SIGUSR2 signals.
+
+Suggestion
+-----------
+Once it is compiled, run the program in the background (...&) and use the shell
+command "kill" to send signals SIGUSR1 and SIGUSR2 to the process.
