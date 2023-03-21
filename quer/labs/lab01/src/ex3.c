@@ -9,8 +9,17 @@ int main(){
     switch (i) {
       case 1: fork(); break;
       case 2: pid=fork(); if (pid!=0) system ("echo case 2"); break;
-      case 3: execlp ("echo", "myPgrm", "case 3", NULL); break;
+      case 3: execlp ("echo", "ciao", "case 3", NULL); break;
     }
   }
   return (0);
 } 
+
+/*
+case 2
+case 2
+case 3
+case 3
+case 3
+case 3
+*/

@@ -5,7 +5,7 @@
 int main () {
   int i;
   for (i=0; i<2; i++) {
-    printf ("i=%d\n", i);
+    fprintf (stdout, "i=%d\n", i);
     if (fork())             // Call # 1
       fork ();              // Call # 2
     else
@@ -13,3 +13,9 @@ int main () {
   }
   return (1);
 }
+
+/*
+  i = 0 x1
+  i = 1 x3
+  i = i x4
+*/
