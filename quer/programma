@@ -1,0 +1,7 @@
+cppBasic:
+    - casting : static casting, const casting, reinterpret casting
+    - classes : friendship, constructors
+    - files
+    - sequential containers
+    - generic algorithms
+    
